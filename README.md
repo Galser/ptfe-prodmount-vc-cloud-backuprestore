@@ -17,8 +17,65 @@ To learn more about the mentioned above tools and technologies -  please check s
 # How-to
 
 ## Prepare authentication credentials
+- Beforehand, you will need to have SSH RSA key available at the default location :
+  - `~/.ssh/id_rsa` and `~/.ssh/id_rsa.pub`
+  > This key is going to be used later to connect to the instance where TFE will be running.
+  
+- Prepare AWS auth credentials (You can create security credentials on [this page](https://console.aws.amazon.com/iam/home?#security_credential).) To export them via env variables, execute in the command line :
+    ```
+    export AWS_ACCESS_KEY_ID="YOUR ACCESS KEY"
+    export AWS_SECRET_ACCESS_KEY="YOUR SECRET KEY"
+    ```
+- Prepare CloudFlare authentication for your domain DNS management - register and export as env variables API keys and tokens. Follow instructions from CloudFlare here: https://support.cloudflare.com/hc/en-us/articles/200167836-Managing-API-Tokens-and-Keys
+    - Export generated token and API keys :
+    ```bash
+    export CLOUDFLARE_API_KEY=YOUR_API_KEY_HERE
+    export CLOUDFLARE_API_TOKEN=YOUR_TOKEN_HERE
+    export CLOUDFLARE_ZONE_API_TOKEN=YOUR_TOKEN_HERE
+    export CLOUDFLARE_DNS_API_TOKEN=YOUR_TOKEN_HERE
+    ```
 
 ## Deploy infrastructure
+- Clone this repo (*use the tools of your choice*)
+- Open the folder with cloned repo
+- Define your domain name in [variables.tf](variables.tf), edit on 2-nd line, following block : 
+  ```terraform
+  variable "site_domain" {
+    default = "guselietov.com"
+  }
+  ```
+- From inside folder with cloned repo init Terraform by executing : 
+```
+terraform init
+```
+Example output can be found here : [terraform_init.md](terraform_init.md)
+
+- Now let's spin up everything, by executing :
+```
+terraform apply -auto-approve
+```
+Example output can be found here : [terraform_apply.md](terraform_apply.md)
+
+Execution will take some time, and at the very end of the output you should see something similar to : 
+```bash
+Outputs:
+
+backend_fqdn = ptfe-pm-1_backend.guselietov.com
+cert_url = https://acme-v02.api.letsencrypt.org/acme/cert/035a5ed202a09ab4f926a4d99ae50f9bdfb5
+full_site_name = ptfe-pm-1.guselietov.com
+loadbalancer_fqdn = ag-tfe-clb-493767462.eu-central-1.elb.amazonaws.com
+public_dns = ec2-18-184-220-142.eu-central-1.compute.amazonaws.com
+public_ip = 18.184.220.142
+```
+- Please note that the successful `apply` should create 3 files with SSL certificate information in local folder : 
+```bash
+# ls -l site*
+-rwxr-xr-x  1 andrii  staff  1939 Oct 29 11:54 site_ssl_cert.pem
+-rwxr-xr-x  1 andrii  staff  3589 Oct 29 11:54 site_ssl_cert_bundle.pem
+-rwxr-xr-x  1 andrii  staff  1675 Oct 29 11:54 site_ssl_private_key.pem
+```
+We are going to use them later. 
+
 
 ## Install TFE
 
@@ -30,7 +87,6 @@ To learn more about the mentioned above tools and technologies -  please check s
 
 
 # TODO
-- [ ] create (reuse) code for infrastructure
 - [ ] install TFE in Prod mode
 - [ ] update README
 - [ ] make snapshot
@@ -41,6 +97,7 @@ To learn more about the mentioned above tools and technologies -  please check s
 
 # DONE
 - [x] define objectives 
+- [x] create (reuse) code for infrastructure
 
 
 # Run logs
