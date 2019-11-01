@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
-# Provisin script for PTFE instance
-sudo apt update -qq -y
-sudo apt install -qq -y curl wget
-# Prod mount disk
-sudo mkfs -t xfs /dev/nvme0n1
-sudo mkdir /tfe-data
-PUUID=$(sudo blkid /dev/nvme0n1 | grep -E -o "[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}")
-sudo sh -c 'echo UUID='$PUUID'   /tfe-data  xfs  defaults,nofail  0  2 >> /etc/fstab'
-sudo mount -a
+# Provision script for PTFE instance
+sudo apt update -q -y
+if [ $? -ne 0 ]; then 
+  echo "First APT update failed, retrying"
+  for i in 1 2 3
+  do
+    sudo apt update -q -y
+    if [ $? -eq 0 ]; then 
+      break;
+    fi # APT success
+  done # APT repeats
+  exit 1
+fi
+which curl || (
+  sudo apt install -qq -y curl wget
+)

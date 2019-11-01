@@ -60,24 +60,65 @@ Execution will take some time, and at the very end of the output you should see 
 ```bash
 Outputs:
 
-backend_fqdn = ptfe-pm-1_backend.guselietov.com
-cert_url = https://acme-v02.api.letsencrypt.org/acme/cert/035a5ed202a09ab4f926a4d99ae50f9bdfb5
-full_site_name = ptfe-pm-1.guselietov.com
-loadbalancer_fqdn = ag-tfe-clb-493767462.eu-central-1.elb.amazonaws.com
-public_dns = ec2-18-184-220-142.eu-central-1.compute.amazonaws.com
-public_ip = 18.184.220.142
+backend_fqdn = ptfe-pm-2_backend.guselietov.com
+cert_url = https://acme-v02.api.letsencrypt.org/acme/cert/03affc5ce49a164a80ca47ac6041c97240a2
+full_site_name = ptfe-pm-2.guselietov.com
+loadbalancer_fqdn = ag-clb-ptfe-pm-2-750426138.eu-central-1.elb.amazonaws.com
+public_dns = ec2-52-59-210-55.eu-central-1.compute.amazonaws.com
+public_ip = 52.59.210.55
 ```
 - Please note that the successful `apply` should create 3 files with SSL certificate information in local folder : 
 ```bash
 # ls -l site*
--rwxr-xr-x  1 andrii  staff  1939 Oct 29 11:54 site_ssl_cert.pem
--rwxr-xr-x  1 andrii  staff  3589 Oct 29 11:54 site_ssl_cert_bundle.pem
--rwxr-xr-x  1 andrii  staff  1675 Oct 29 11:54 site_ssl_private_key.pem
+-rwxr-xr-x  1 andrii  staff  1935 Oct 31 15:17 site_ssl_cert.pem
+-rwxr-xr-x  1 andrii  staff  3585 Oct 31 15:17 site_ssl_cert_bundle.pem
+-rwxr-xr-x  1 andrii  staff  1679 Oct 31 15:13 site_ssl_private_key.pem
 ```
 We are going to use them later. 
 
 
 ## Install TFE
+
+## Terminal-based portion of TFE installation
+- Connect to VM : 
+```
+ssh ubuntu@52.59.210.55
+``` 
+> Note : Use the `public_ip` or `backend_fqdn` from the previous step
+
+- Start the PTFE install: 
+```curl https://install.terraform.io/ptfe/stable | sudo bash```
+    - use Public IP-address from previous steps ( `18.184.220.142` in the example ) for the service question. You can just press [Enter],
+    - Reply `N` to proxy question. Again - you can just press [Enter]
+    Output example : 
+  ```bash
+    % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                  Dload  Upload   Total   Spent    Left  Speed
+  100  118k  100  118k    0     0  48967      0  0:00:02  0:00:02 --:--:-- 48967
+  Determining local address
+  The installer will use network interface 'ens5' (with IP address '172.31.2.88')
+  Determining service address
+  The installer will use service address '18.184.220.142' (discovered from EC2 metadata service)
+  The installer has automatically detected the service IP address of this machine as 18.184.220.142.
+  Do you want to:
+  [0] default: use 18.184.220.142
+  [1] enter new address
+  Enter desired number (0-1): 0
+  Does this machine require a proxy to access the Internet? (y/N) n
+  Installing docker version 18.09.2 from https://get.replicated.com/docker-install.sh
+  # Executing docker install script, commit: UNKNOWN 
+  ...
+  + sh -c apt-get update -qq >/dev/null
+  + sh -c apt-get install -y -qq apt-transport-https ca-certificates curl >/dev/null...
+  Operator installation successful
+
+  To continue the installation, visit the following URL in your browser:
+
+    http://52.59.210.55:8800
+
+  ```
+
+## 
 
 ## Make snapshot
 
@@ -121,5 +162,7 @@ We are going to use them later.
 4. **Cloudflare**, - is an American web infrastructure and website security company, providing content delivery network services, DDoS mitigation, Internet security, and distributed domain name server services. More information can be found here: https://www.cloudflare.com/ 
 
 5. **Let'sEncrypt** - Let's Encrypt is a non-profit certificate authority run by Internet Security Research Group that provides X.509 certificates for Transport Layer Security encryption at no charge. The certificate is valid for 90 days, during which renewal can take place at any time. You can find out more on their [official page](https://letsencrypt.org/)
+
+
 
 
