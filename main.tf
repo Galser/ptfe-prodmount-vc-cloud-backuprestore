@@ -44,6 +44,12 @@ resource "aws_instance" "ptfe" {
     source      = "scripts/mount-ebs.sh"
     destination = "/tmp/mount-ebs.sh"
   }
+
+  provisioner "file" {
+    source      = "scripts/delete_all.sh"
+    destination = "/tmp/delete_all.sh"
+  }
+
 }
 
 # Provision EBS volumes

@@ -118,27 +118,191 @@ ssh ubuntu@52.59.210.55
 
   ```
 
-## 
+## Web-based portion of TFE installation
+
+- Open your favorite browser and access the link that had been presented to you at the previous step: http:// 52.59.210.55:8800,  As we using self-signed certificates for this part of the installation, you will see a security warning when first connecting. **This is expected and you'll need to proceed with the connection anyway.**
+- Now you will be presented with settings screen :
+![Installation certificate request](screenshots/1_install_cert_question.png)
+    Where you will need to
+    - enter hostname: `ptfe-pm-2.guselietov.com` *( this used in the example, you may have another one if you modified settings earlier)*
+    - Choose File for Private Key ( point to `site_ssl_private_key.pem` in the current folder)
+    - Choose File for Certificate ( point to `site_ssl_cert.pem` in the current folder)
+    - and press green button **[Upload & Continue]**
+
+   > Sometimes, depending on the speed of instance connection and external resources replies you will fail to access this screen because load-balancer could not detect that Terraform Dashboard already running and removed it from service. Just wait 30 seconds and refresh the page.  
+- Now you will need to present your license file. Usually, it comes in a special tar-ball package with extension RLI. Press **[Choose license]**, Locate the file and upload.
+![Add license form](screenshots/2_add_license.png)
+    > And you can also see - that you've been automatically redirected to the new URL: `https://ptfe-pm-2.guselietov.com:8800/`
+    > and that the "lock" icon next to the FQDN of the site in the URL bar is closed, meaning that certificate recognized as valid by the browser and corresponds to the address of the site.
+- The next screen allows you to select between *Online* and *air-gapped* installation. Choose **[Online]** :
+![Choose install type](screenshots/3_choose_install_type.png)
+And press **[Continue]** button
+- On the next step, you will need to enter the password, that can be used in the future to access THIS, Admin Console :
+![Secure Admin COnsole](screenshots/3_1_secure_admin_console.png)
+Enter the desired password, and press continue
+- Now you will see the "Preflight Checks" when all the main requirements for the PTFE installation checked and the one that passed marked with a green checkmark. They ALL should be green to pass.
+Once more, press **[Continue]** button
+- The next screen presents all your settings in one place
+    - Check that host FQDN is correct
+    - Scroll down to the *Installation Type* section and select **[Production]**
+    - Now in the next section *Production Type* select **[Mounted Disk]**
+    - Below it, in the *Mounted Disk Configuration* enter path : `/tfe-data`
+    
+    Consult the screenshop for guidance : 
+    
+    ![Prod Settings](screenshots/3_3_settings_prod.png)
+    
+    - Scroll to the next section: *SSL/TLS Configuration* - and paste the contents of your SSL Certificate bundle here
+    ( Use the contents of the file `site_ssl_cert_bundle.pem` from current folder)
+    After that - press **[Save]** button at the bottom of the page to save all your settings. And you going to be present with the following informational screen :
+![Settings saved, restart now](screenshots/4_restat_now.png)
+ Press **[Restart Now]**
+- At this moment PTFE will do a full start of all internal services, it can take a couple of minutes, refresh the windows from time to time :
+![Starting dashboard](screenshots/5_starting.png)
+  > Note:..Depending on your browser and/or browser settings the starting in the left part of Dashboard - never changes unless you reload the page. So force-reload the page after 2-3 minutes.
+- While TFE starting, please access top-right menu with settings, "Console Settings" item. In the opened page, find section *Snapshot & Restore*. In the filed **"Snapshot File Destination"** enter : `/tfe-snapshots`.
+Press blue **[Save]** button at the bottom of the page.
+- Return to the dashboard. Wait a couple of minutes for the state at the left rectangle to be changed to **Started**. Now, below the button [Stop now] there is link **[Open]** :
+
+    ![Started](screenshots/6_started.png)
+
+    Open it, this will lead you to the first-time setup of the admin user :
+- Set up your admin user :
+
+    ![Setup admin user](screenshots/7_admin_setup.png)
+    
+    Fill in the form and press **[Create an account]**
+- Now you are logged-in, create organization and workspace in it, for the demo, we have organization *"acme"* and workspace *"playground"* : 
+    
+    ![Org and workspace](screenshots/8_org_and_workspace.png)
+    
+    > Names do not matter, but we are going to see that everything is restored from backup by checking that proper organization and workspace is in place, later.
+
+Ok - you have new PTFE installation with organization and workspace -  installation is done. Now let's work with snapshots.
+
 
 ## Make snapshot
+- Go to the *Admin Console* of PTFE: https://ptfe-pm-2.guselietov.com:8800/dashboard, at the right side of it you are going to see the section with the text *"Snapshots Enabled"* and a button **[Start Snapshot]**, press it  :
 
-## Kill TFE
+    ![Enabled snapshots](screenshots/9_screenshots_enabled.png)
 
-## Restore TFE
+- After you have pressed the button, the right section is going to display progress through the series of status messages : 
+
+    ![Snap progress](screenshots/10_snapshot_progress.png)
+
+- When the snapshot is done, the section is going to change, to indicate the date and time of the last snapshot, and bearing 2 buttons - **[Start Snapshot]** and **[History]** : 
+
+    ![Done snapshot](screenshots/11_snapshot_done.png)
+
+## Kill TFE - Imitating full application disaster
+
+In order to demonstrate recovery from a snapshot we are going to simulate full application disaster - wipe it out completely (preserving snapshot) and then restoring with the state.
+
+- Login via SSH to your VM by executing : 
+    ```
+    ssh ubuntu@52.59.210.55
+    ```
+- Become root :
+    ```
+    sudo su -
+    ```
+- There is a special script that will imitate the crash and disaster, but still preserve our snapshots in [/tmp/delete_all.sh](delete_all.sh), 
+execute it (**still under root privileges**):
+    ```bash
+    bash /tmp/delete_all.sh
+    CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES    
+    ```
+  Done, let's check, execute  : 
+    ```
+    ls -l /var/lib/replicated
+    ls: cannot access '/var/lib/replicated': No such file or directory
+    ```
+  And the last check : 
+- Let's check that we indeed "have killed" our application by accessing the Admin Dashboard at the URL : https://ptfe-pm-2.guselietov.com:8800/dashboarddashboard, and we see : 
+
+    ![PTFE Dead](screenshots/12_ptfe_is_dead.png)
+
+### Restore from a snapshot
+
+- If you are still in SSH session with your VM,reuse it, otherwise please connect once more by executing : 
+    ```
+    ssh ubuntu@52.59.210.55
+    ```
+- Start installation of PTFE again (remember? we had wiped out everything) by executing : 
+    ```bash
+    curl https://install.terraform.io/ptfe/stable | sudo bash
+    ```
+- Repeat everything for the terminal portion of the install
+    - select and re-use teh same IP-address `172.31.2.88` private IP-address
+    - confirm default address for the service IP (again, in our case  - same as first time) : `52.59.210.55` 
+    - Select `no proxy` for Internet access
+- Go the Web-portion of PTFE install, open in your browser : https://52.59.210.55:8800/
+    - Press **[Continue to Setup]** and confirm security exception
+    - at the screen *"HTTPS for admin console"* - supply proper SSL keys (**SAME as first time!**), certificate and bundle, use the name *"ptfe-pm-2.guselietov.com"* for the host (again - SAME name)
+    - Press **[Upload & Continue]**
+- Now, at the screen asking for the license, stop, there should be the link below : **[Restore from a snapshot]** : 
+    
+    ![License](screenshots/13_license_question.png)
+
+    Click it
+
+- At the next screen you going to see: *Restore from a snapshot* with the message below -  *No snapshot found*
+
+    You will need to enter the into field : "Snapshot File Path" following path (same as 1-st time) - `/tfe-snapshots` : 
+
+    ![Snapshot path](screenshots/14_snapshot_path.png)
+
+    Press the button **[Browse snapshots]**, and you going to see after some time : 
+
+    ![List of snapshots](screenshots/15_snapshots_list.png)
+
+- Choose the latest snapshot in the list and press the small button **[restore]** next to it, after that you will see a series of the screens with progress status  :
+
+    ![Restoring snapshot](screenshots/16_restoring.png)
+
+    And at the end - request to **unlock Admin Console**: 
+
+    ![Unlock](screenshots/17_unlock_console.png)
+
+- Unlock the console by entering the password from the very first installation and you will see again screen with *"Preflight Checks"*, press **[Continue]** button
+
+-  Now you will see next screen - *Restore Cluster*, press the button **Restore** :
+
+    ![Restore cluster](screenshots/11_restore_cluster.png)
+
+- After the process is finished, you going to see **"Cluster"** state page from where you can directly go to the *(Dashboard of Admin Console* and observe the progress in the left section : 
+
+    ![Restore progress](screenshots/18_restart_after_restore.png)
+
+    and if you look at the greater picture : 
+
+    ![Restore progress 2](screenshots/19_while_restore_status.png)
+
+    > Note: You can spot that the right section right now have only **Snapshots Enabled** message, and nothing more.
+
+    Wait until it finishes.
+
+- Open *PTFE Dashboard* ( not Admin Console!), at workspaces for our [Looney Tunes-inspired organization](https://en.wikipedia.org/wiki/Acme_Corporation) : https://ptfe-pm-2.guselietov.com/app/acme/workspaces :
+
+    ![organization and workspace in place](screenshots/20_org_and_work_still_here.png)
+
+    As you can see from the screenshot - everything is in place.
+
+This concludes the instruction section. now we have successfully performed the restore from a snapshot and resurrected our PTFE. Thank you.
 
 
 # TODO
-- [ ] install TFE in Prod mode
-- [ ] update README
-- [ ] make snapshot
-- [ ] kill TFE
-- [ ] restore TFE from snapshot
 - [ ] update README for restore part
 
 
 # DONE
 - [x] define objectives 
 - [x] create (reuse) code for infrastructure
+- [x] install TFE in Prod mode
+- [x] update README
+- [x] make snapshot
+- [x] kill TFE
+- [x] restore TFE from snapshot
 
 
 # Run logs
