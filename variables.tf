@@ -18,6 +18,10 @@ variable "vpc_tag" {
   default = "ag_ptfe_pm"
 }
 
+variable "disks_tag" {
+  default = "ag_ptfe_pm"
+}
+
 variable "subnet_ids" {
   type = "map"
   default = {
@@ -33,14 +37,6 @@ variable "amis" {
   }
 }
 
-variable "vpc_security_group_ids" {
-  type = "map"
-  default = {
-    "us-east-2"    = "sg-435345ce45e345343" # sg not tested 
-    "eu-central-1" = "sg-04c059aea335d8f69" # sg tested
-  }
-}
-
 variable "instance_type" {
   default = "m5.large"
 }
@@ -50,3 +46,20 @@ variable "learntag" {
   default = "200tf"
 }
 
+variable "tfe_disks" {
+  type = "map"
+  default = {
+    "tfe_data" = {
+      name        = "tfe-data"
+      mount_point = "/tfe-data"
+      device_name = "/dev/sdf"
+      size        = 41 # G
+    },
+    "tfe_snapshot" = {
+      name        = "tfe-snapshots"
+      mount_point = "/tfe-snapshots"
+      device_name = "/dev/sdg"
+      size        = 100 # G 
+    },
+  }
+}
