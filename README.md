@@ -5,7 +5,7 @@ Based on two repositories: https://github.com/Galser/ptfe-prodmount-vc-cloud and
 
 # Purpose
 
-This repo contains all the code and instructions on how to install PTFE (Prod) version with a Valid Certificate in a cloud environment in mounted disk mode. With later making/restoration of its state from a snapshot. 
+This repo contains all the code and instructions on how to install a PTFE (Prod) version with a Valid Certificate in a cloud environment in mounted disk mode. With later making/restoration of its state from a snapshot. 
 
 # Requirements
 
@@ -120,16 +120,16 @@ ssh ubuntu@52.59.210.55
 
 ## Web-based portion of TFE installation
 
-- Open your favorite browser and access the link that had been presented to you at the previous step: http:// 52.59.210.55:8800,  As we using self-signed certificates for this part of the installation, you will see a security warning when first connecting. **This is expected and you'll need to proceed with the connection anyway.**
-- Now you will be presented with settings screen "HTTPS for Admin Console":
+- Open your favorite browser and access the link that had been presented to you at the previous step: http://52.59.210.55:8800 ,  As we using self-signed certificates for this part of the installation, you will see a security warning when first connecting. **This is expected and you'll need to proceed with the connection anyway.**
+- Now you will be presented with settings screen "HTTPS for Admin Console" :
 
 ![Add certificate form](screenshots/1_install_cert_question.png)
 
-    Where you will need to
-    - enter hostname: `ptfe-pm-2.guselietov.com` *( this used in the example, you may have another one if you modified settings earlier)*
-    - Choose File for Private Key ( point to `site_ssl_private_key.pem` in the current folder)
-    - Choose File for Certificate ( point to `site_ssl_cert.pem` in the current folder)
-    - and press green button **[Upload & Continue]**
+  Where you will need to
+  - enter hostname: `ptfe-pm-2.guselietov.com` ( *this used in the example, you may have another one if you modified settings earlier* )
+  - Choose File for Private Key ( point to `site_ssl_private_key.pem` in the current folder)
+  - Choose File for Certificate ( point to `site_ssl_cert.pem` in the current folder)
+  - and press green button **[Upload & Continue]**
 
    > Sometimes, depending on the speed of instance connection and external resources replies you will fail to access this screen because load-balancer could not detect that Terraform Dashboard already running and removed it from service. Just wait 30 seconds and refresh the page.  
 - Now you will need to present your license file. Usually, it comes in a special tar-ball package with extension RLI. Press **[Choose license]**, Locate the file and upload.
@@ -144,7 +144,7 @@ And press **[Continue]** button
 - On the next step, you will need to enter the password, that can be used in the future to access THIS, Admin Console :
 ![Secure Admin COnsole](screenshots/3_1_secure_admin_console.png)
 Enter the desired password, and press continue
-- Now you will see the "Preflight Checks" when all the main requirements for the PTFE installation checked and the one that passed marked with a green checkmark. They ALL should be green to pass.
+- Now you will see the *"Preflight Checks"* when all the main requirements for the PTFE installation checked and the one that passed marked with a green checkmark. They ALL should be green to pass.
 Once more, press **[Continue]** button
 - The next screen presents all your settings in one place
     - Check that host FQDN is correct
@@ -164,7 +164,7 @@ Once more, press **[Continue]** button
 - At this moment PTFE will do a full start of all internal services, it can take a couple of minutes, refresh the windows from time to time :
 ![Starting dashboard](screenshots/5_starting.png)
   > Note:..Depending on your browser and/or browser settings the starting in the left part of Dashboard - never changes unless you reload the page. So force-reload the page after 2-3 minutes.
-- While TFE starting, please access top-right menu with settings, "Console Settings" item. In the opened page, find section *Snapshot & Restore*. In the filed **"Snapshot File Destination"** enter : `/tfe-snapshots`.
+- While TFE starting, please access the top-right menu with settings, "Console Settings" item. In the opened page, find section *Snapshot & Restore*. In the filed **"Snapshot File Destination"** enter : `/tfe-snapshots`.
 Press blue **[Save]** button at the bottom of the page.
 - Return to the dashboard. Wait a couple of minutes for the state at the left rectangle to be changed to **Started**. Now, below the button [Stop now] there is link **[Open]** :
 
@@ -200,7 +200,7 @@ Ok - you have new PTFE installation with organization and workspace -  installat
 
 ## Kill TFE - Imitating full application disaster
 
-In order to demonstrate recovery from a snapshot we are going to simulate full application disaster - wipe it out completely (preserving snapshot) and then restoring with the state.
+To demonstrate recovery from a snapshot we are going to simulate full application disaster - wipe it out completely (preserving snapshot) and then restoring with the state.
 
 - Login via SSH to your VM by executing : 
     ```
@@ -228,19 +228,19 @@ execute it (**still under root privileges**):
 
 ### Restore from a snapshot
 
-- If you are still in SSH session with your VM,reuse it, otherwise please connect once more by executing : 
+- If you are still in SSH session with your VM, reuse it, otherwise please connect once more by executing : 
     ```
     ssh ubuntu@52.59.210.55
     ```
-- Start installation of PTFE again (remember? we had wiped out everything!) by executing : 
+- Start the installation of PTFE again (remember? we had wiped out everything!) by executing : 
     ```bash
     curl https://install.terraform.io/ptfe/stable | sudo bash
     ```
 - Repeat everything for the terminal portion of the install
-    - select and re-use the same IP-address (as first time) `172.31.2.88` for 1-st question
-    - confirm default address for the service IP (again, in our case  - same as first time) : `52.59.210.55` 
+    - select and re-use the same IP-address (as the first time) `172.31.2.88` for 1-st question
+    - confirm default address for the service IP (again, in our case  - same as the first time): `52.59.210.55` 
     - Select `no proxy` for Internet access
-- Go the Web-portion of PTFE install, open in your browser : https://52.59.210.55:8800/
+- Go the Web-portion of PTFE install, open in your browser: https://52.59.210.55:8800/
     - Press **[Continue to Setup]** and confirm security exception
     - at the screen *"HTTPS for admin console"* - supply proper SSL keys (**SAME as first time!**), certificate and bundle, use the name *"ptfe-pm-2.guselietov.com"* for the host (again - SAME name)
     - Press **[Upload & Continue]**
@@ -250,7 +250,7 @@ execute it (**still under root privileges**):
 
     Click it
 
-- At the next screen you going to see: *Restore from a snapshot* with the message below -  *No snapshot found*
+- At the next screen, you going to see: *Restore from a snapshot* with the message below -  *No snapshot found*
 
     You will need to enter the into field : "Snapshot File Path" following path (same as 1-st time) - `/tfe-snapshots` : 
 
@@ -272,13 +272,7 @@ execute it (**still under root privileges**):
 
 -  Now you will see next screen - *Restore Cluster*, press the button **Restore** :
 
-    ![Restore cluster](screenshots/11_restore_cluster.png)
-
-- After the process is finished, you going to see **"Cluster"** state page from where you can directly go to the *(Dashboard of Admin Console* and observe the progress in the left section : 
-
-    ![Restore progress](screenshots/18_restart_after_restore.png)
-
-    and if you look at the greater picture : 
+- After the process is finished, you going to see **"Cluster"** state page from where you can directly go to the *(Dashboard of Admin Console* and observe the progress : 
 
     ![Restore progress 2](screenshots/19_while_restore_status.png)
 
@@ -292,11 +286,17 @@ execute it (**still under root privileges**):
 
     As you can see from the screenshot - everything is in place.
 
-This concludes the instruction section. now we have successfully performed the restore from a snapshot and resurrected our PTFE. Thank you.
+This concludes the instruction section. now we have successfully performed the restore from a snapshot and resurrected our PTFE, thank you.
+
+- If you do not need the TFE infrastructure anymore and want to free-up resource, please execute from the folder with cloned repo : 
+  ```bash
+  terraform destroy
+  ```
+  And confirm the request by typing: `yes`
+
 
 
 # TODO
-
 
 
 # DONE
