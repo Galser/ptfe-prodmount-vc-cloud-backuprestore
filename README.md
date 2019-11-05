@@ -88,7 +88,7 @@ ssh ubuntu@52.59.210.55
 
 - Start the PTFE install: 
 ```curl https://install.terraform.io/ptfe/stable | sudo bash```
-    - use Public IP-address from previous steps ( `18.184.220.142` in the example ) for the service question. You can just press [Enter],
+    - use Public IP-address from previous steps ( `52.59.210.55` in the example ) for the service question. You can just press [Enter],
     - Reply `N` to proxy question. Again - you can just press [Enter]
     Output example : 
   ```bash
@@ -98,10 +98,10 @@ ssh ubuntu@52.59.210.55
   Determining local address
   The installer will use network interface 'ens5' (with IP address '172.31.2.88')
   Determining service address
-  The installer will use service address '18.184.220.142' (discovered from EC2 metadata service)
-  The installer has automatically detected the service IP address of this machine as 18.184.220.142.
+  The installer will use service address '52.59.210.55' (discovered from EC2 metadata service)
+  The installer has automatically detected the service IP address of this machine as 52.59.210.55.
   Do you want to:
-  [0] default: use 18.184.220.142
+  [0] default: use 52.59.210.55
   [1] enter new address
   Enter desired number (0-1): 0
   Does this machine require a proxy to access the Internet? (y/N) n
@@ -121,8 +121,10 @@ ssh ubuntu@52.59.210.55
 ## Web-based portion of TFE installation
 
 - Open your favorite browser and access the link that had been presented to you at the previous step: http:// 52.59.210.55:8800,  As we using self-signed certificates for this part of the installation, you will see a security warning when first connecting. **This is expected and you'll need to proceed with the connection anyway.**
-- Now you will be presented with settings screen :
-![Installation certificate request](screenshots/1_install_cert_question.png)
+- Now you will be presented with settings screen "HTTPS for Admin Console":
+
+![Add certificate form](screenshots/1_install_cert_question.png)
+
     Where you will need to
     - enter hostname: `ptfe-pm-2.guselietov.com` *( this used in the example, you may have another one if you modified settings earlier)*
     - Choose File for Private Key ( point to `site_ssl_private_key.pem` in the current folder)
@@ -131,7 +133,9 @@ ssh ubuntu@52.59.210.55
 
    > Sometimes, depending on the speed of instance connection and external resources replies you will fail to access this screen because load-balancer could not detect that Terraform Dashboard already running and removed it from service. Just wait 30 seconds and refresh the page.  
 - Now you will need to present your license file. Usually, it comes in a special tar-ball package with extension RLI. Press **[Choose license]**, Locate the file and upload.
+
 ![Add license form](screenshots/2_add_license.png)
+
     > And you can also see - that you've been automatically redirected to the new URL: `https://ptfe-pm-2.guselietov.com:8800/`
     > and that the "lock" icon next to the FQDN of the site in the URL bar is closed, meaning that certificate recognized as valid by the browser and corresponds to the address of the site.
 - The next screen allows you to select between *Online* and *air-gapped* installation. Choose **[Online]** :
@@ -148,7 +152,7 @@ Once more, press **[Continue]** button
     - Now in the next section *Production Type* select **[Mounted Disk]**
     - Below it, in the *Mounted Disk Configuration* enter path : `/tfe-data`
     
-    Consult the screenshop for guidance : 
+    Consult the screenshot for guidance : 
     
     ![Prod Settings](screenshots/3_3_settings_prod.png)
     
@@ -228,12 +232,12 @@ execute it (**still under root privileges**):
     ```
     ssh ubuntu@52.59.210.55
     ```
-- Start installation of PTFE again (remember? we had wiped out everything) by executing : 
+- Start installation of PTFE again (remember? we had wiped out everything!) by executing : 
     ```bash
     curl https://install.terraform.io/ptfe/stable | sudo bash
     ```
 - Repeat everything for the terminal portion of the install
-    - select and re-use teh same IP-address `172.31.2.88` private IP-address
+    - select and re-use the same IP-address (as first time) `172.31.2.88` for 1-st question
     - confirm default address for the service IP (again, in our case  - same as first time) : `52.59.210.55` 
     - Select `no proxy` for Internet access
 - Go the Web-portion of PTFE install, open in your browser : https://52.59.210.55:8800/
@@ -292,7 +296,7 @@ This concludes the instruction section. now we have successfully performed the r
 
 
 # TODO
-- [ ] update README for restore part
+
 
 
 # DONE
@@ -303,13 +307,13 @@ This concludes the instruction section. now we have successfully performed the r
 - [x] make snapshot
 - [x] kill TFE
 - [x] restore TFE from snapshot
-
+- [x] update README for restore part
 
 # Run logs
 
 - terraform apply  : [terraform_apply.md](terraform_apply.md)
 - TFE destruction (full disaster imitation) : [tfe_destruction.md](tfe_destruction.md)
-- terraform destroy : [terraform_destroy.md](terraform_destroy.md)
+- terraform destroy of infra : [terraform_destroy.md](terraform_destroy.md)
 
 
 
